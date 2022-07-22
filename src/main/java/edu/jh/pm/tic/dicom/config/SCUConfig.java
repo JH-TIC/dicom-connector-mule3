@@ -2,6 +2,7 @@ package edu.jh.pm.tic.dicom.config;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Objects;
 
 import org.dcm4che3.data.UID;
 
@@ -18,12 +19,15 @@ import edu.jh.pm.tic.dicom.models.TransferSyntax;
  */
 public class SCUConfig {
 	public SCUConfig() {}
-	public SCUConfig(String aetName, String hostname, int port, 
+	public SCUConfig(String aetName, String hostname, int port, String userName, String userPassword, boolean userResponseRequested,
 			InformationModel informationModel, RetrieveLevel retrieveLevel, TransferSyntax transferSyntax, 
 			Map<String,Object> sopClasses, int storeTimeout, int cancelAfter) {
 		this.aetName = aetName;
 		this.hostname = hostname;
 		this.port = port;
+		this.userName = userName;
+		this.userPassword = userPassword;
+		this.userResponseRequested = userResponseRequested;
 		this.informationModel = informationModel;
 		this.retrieveLevel = retrieveLevel;
 		this.transferSyntax = transferSyntax;
@@ -44,11 +48,23 @@ public class SCUConfig {
     public int getPort() { return port; }
     public void setPort(int port) { this.port = port; }
 
+	private String userName;
+	public String getUserName() { return userName; }
+	public void setUserName(String userName) { this.userName = userName; }
+
+	private String userPassword;
+	public String getUserPassword() { return userPassword; }
+	public void setUserPassword(String userPassword) { this.userPassword = userPassword; }
+
+	private boolean userResponseRequested;
+	public boolean getUserResponseRequested() { return userResponseRequested; }
+	public void setUserResponseRequested(boolean userResponseRequested) { this.userResponseRequested = userResponseRequested; }
+
     private InformationModel informationModel;
     public InformationModel getInformationModel() { return informationModel; }
     public void setInformationModel(InformationModel informationModel) { this.informationModel = informationModel; }
     public String getInformationModelCuid(String operation) {
-    	if (operation == "Store") return UID.Verification;
+    	if (Objects.equals(operation, "Store")) return UID.Verification;
     	String cuidType;
     	switch (informationModel) {
 			case CompositeInstanceRoot:

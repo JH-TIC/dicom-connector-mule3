@@ -47,3 +47,8 @@ flows/
 target/
 src/main/api/.repository/
 .apt_generated/
+
+# --------------- #
+# IntelliJ -specific #
+# --------------- #
+.idea/

@@ -113,7 +113,7 @@ Reference in pom.xml
 <dependency>
     <groupId>edu.jh.pm</groupId>
     <artifactId>dicom-connector</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.1</version>
 </dependency>
 ```
 

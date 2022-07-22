@@ -18,6 +18,7 @@ import org.dcm4che3.net.Device;
 import org.dcm4che3.net.IncompatibleConnectionException;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
+import org.dcm4che3.net.pdu.UserIdentityRQ;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,10 @@ class MuleSCU {
             device.setDimseRQHandler(cStoreSCP.createServiceRegistry());
         }
         rq.setCalledAET(config.getAetName());
+        if (config.getUserName() != null && !config.getUserName().isEmpty()) {
+            UserIdentityRQ identity = UserIdentityRQ.usernamePasscode(config.getUserName(), config.getUserPassword().toCharArray(), config.getUserResponseRequested());
+            rq.setUserIdentityRQ(identity);
+        }
         remote.setHostname(config.getHostname());
         remote.setPort(config.getPort());
         remote.setHttpProxy(null);
