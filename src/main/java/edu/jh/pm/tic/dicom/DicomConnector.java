@@ -26,6 +26,7 @@ import org.mule.api.annotations.Processor;
 import org.mule.api.annotations.Source;
 import org.mule.api.annotations.SourceStrategy;
 import org.mule.api.annotations.display.FriendlyName;
+import org.mule.api.annotations.display.Password;
 import org.mule.api.annotations.display.Placement;
 import org.mule.api.annotations.display.Summary;
 import org.mule.api.callback.SourceCallback;
@@ -86,6 +87,9 @@ public class DicomConnector {
     public Object moveScu(@Placement(group = "Remote Connection") @FriendlyName("AE Title") @Summary("Application Entity Title") String aetName,
     		@Placement(group = "Remote Connection") @Default("0.0.0.0") String hostname,
     		@Placement(group = "Remote Connection") @Default("104") int port,
+            @Placement(group = "Remote Connection") @Optional String userName,
+            @Placement(group = "Remote Connection") @Optional @Password String userPassword,
+            @Placement(group = "Remote Connection") @Default("true") @Summary("Require positive response from Username/Password Identity") boolean userResponseRequested,
     		@Placement(group = "Presentation Context") @Summary("Can be PatientRoot, PatientStudyOnly, CompositeInstanceRoot, HangingProtocol, ColorPalette, or StudyRoot (the default)") @Default("StudyRoot") InformationModel informationModel,
     		@Placement(group = "Presentation Context") @Optional @Summary("Can be PATIENT, STUDY, SERIES, IMAGE, or FRAME") RetrieveLevel retrieveLevel,
     		@Placement(group = "Presentation Context") @Summary("Preferred compression of VR tags") @Default("ImplicitFirst") TransferSyntax transferSyntax,
@@ -93,7 +97,7 @@ public class DicomConnector {
     		@Placement(group = "Timings") @Optional @Default("0") int storeTimeout,
     		@Placement(group = "Timings") @Optional @Default("0") @Summary("Duration in milliseconds (0 is infinite)") int cancelAfter,
             MuleMessage muleMessage) throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
-    	SCUConfig remoteConnection = new SCUConfig(aetName, hostname, port, informationModel, retrieveLevel, transferSyntax, sopClasses, storeTimeout, cancelAfter);
+    	SCUConfig remoteConnection = new SCUConfig(aetName, hostname, port, userName, userPassword, userResponseRequested, informationModel, retrieveLevel, transferSyntax, sopClasses, storeTimeout, cancelAfter);
         Attributes keys = AttribUtils.payloadToKeys(muleMessage);
     	String level = remoteConnection.getRetrieveLevelDefault();
         if (level != null) keys.setString(Tag.QueryRetrieveLevel, VR.CS, level);
@@ -115,12 +119,15 @@ public class DicomConnector {
     public List<Map<String,Object>> findScu(@Placement(group = "Remote Connection") @FriendlyName("AE Title") @Summary("Application Entity Title") String aetName,
     		@Placement(group = "Remote Connection") @Default("0.0.0.0") String hostname,
     		@Placement(group = "Remote Connection") @Default("104") int port,
+            @Placement(group = "Remote Connection") @Optional String userName,
+            @Placement(group = "Remote Connection") @Optional @Password String userPassword,
+            @Placement(group = "Remote Connection") @Default("true") @Summary("Require positive response from Username/Password Identity") boolean userResponseRequested,
     		@Placement(group = "Presentation Context") @Summary("Can be PatientRoot, PatientStudyOnly, CompositeInstanceRoot, HangingProtocol, ColorPalette, or StudyRoot (the default)") @Default("StudyRoot") InformationModel informationModel,
     		@Placement(group = "Presentation Context") @Optional @Summary("Can be PATIENT, STUDY, SERIES, IMAGE, or FRAME") RetrieveLevel retrieveLevel,
     		@Placement(group = "Presentation Context") @Summary("Preferred compression of VR tags") @Default("ImplicitFirst") TransferSyntax transferSyntax,
     		@Placement(group = "Timings") @Optional @Default("0") @Summary("Duration in milliseconds (0 is infinite)") int cancelAfter,
     		MuleMessage muleMessage) throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
-    	SCUConfig remoteConnection = new SCUConfig(aetName, hostname, port, informationModel, retrieveLevel, transferSyntax, new HashMap<>(), 0, cancelAfter);
+    	SCUConfig remoteConnection = new SCUConfig(aetName, hostname, port, userName, userPassword, userResponseRequested, informationModel, retrieveLevel, transferSyntax, new HashMap<>(), 0, cancelAfter);
         Attributes keys = AttribUtils.payloadToKeys(muleMessage);
     	String level = remoteConnection.getRetrieveLevelDefault();
         if (level != null) keys.setString(Tag.QueryRetrieveLevel, VR.CS, level);
@@ -142,6 +149,9 @@ public class DicomConnector {
     public List<String> getScu(@Placement(group = "Remote Connection") @FriendlyName("AE Title") @Summary("Application Entity Title") String aetName,
     		@Placement(group = "Remote Connection") @Default("0.0.0.0") String hostname,
     		@Placement(group = "Remote Connection") @Default("104") int port,
+            @Placement(group = "Remote Connection") @Optional String userName,
+            @Placement(group = "Remote Connection") @Optional @Password String userPassword,
+            @Placement(group = "Remote Connection") @Default("true") @Summary("Require positive response from Username/Password Identity") boolean userResponseRequested,
     		@Placement(group = "Presentation Context") @Summary("Can be PatientRoot, PatientStudyOnly, CompositeInstanceRoot, HangingProtocol, ColorPalette, or StudyRoot (the default)") @Default("StudyRoot") InformationModel informationModel,
     		@Placement(group = "Presentation Context") @Optional @Summary("Can be PATIENT, STUDY, SERIES, IMAGE, or FRAME") RetrieveLevel retrieveLevel,
     		@Placement(group = "Presentation Context") @Summary("Preferred compression of VR tags") @Default("ImplicitFirst") TransferSyntax transferSyntax,
@@ -151,7 +161,7 @@ public class DicomConnector {
             @Summary("Folder where all files are saved") String outputFilePath,
             @Optional @Summary("Instance of a class that implements edu.jh.pm.dicom.store.Notification") Notification notification,
             MuleMessage muleMessage) throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
-    	SCUConfig remoteConnection = new SCUConfig(aetName, hostname, port, informationModel, retrieveLevel, transferSyntax, sopClasses, storeTimeout, cancelAfter);
+    	SCUConfig remoteConnection = new SCUConfig(aetName, hostname, port, userName, userPassword, userResponseRequested, informationModel, retrieveLevel, transferSyntax, sopClasses, storeTimeout, cancelAfter);
     	Attributes keys = AttribUtils.payloadToKeys(muleMessage);
     	String level = remoteConnection.getRetrieveLevelDefault();
         if (level != null) keys.setString(Tag.QueryRetrieveLevel, VR.CS, level);
@@ -181,7 +191,10 @@ public class DicomConnector {
     public List<Map<String,Object>> storeScu(
     		@Placement(group = "Remote Connection") @FriendlyName("AE Title") @Summary("Application Entity Title") String aetName, 
     		@Placement(group = "Remote Connection") @Default("0.0.0.0") String hostname, 
-    		@Placement(group = "Remote Connection") @Default("104") int port, 
+    		@Placement(group = "Remote Connection") @Default("104") int port,
+            @Placement(group = "Remote Connection") @Optional String userName,
+            @Placement(group = "Remote Connection") @Optional @Password String userPassword,
+            @Placement(group = "Remote Connection") @Default("true") @Summary("Require positive response from Username/Password Identity") boolean userResponseRequested,
     		@Placement(group = "Timings") @Default("0") @Summary("Duration in milliseconds (0 is infinite)") int cancelAfter, 
     		MuleMessage muleMessage) throws IOException, InterruptedException, IncompatibleConnectionException, GeneralSecurityException {
         MuleDimseRSPHandler handler = null;
@@ -201,7 +214,7 @@ public class DicomConnector {
         if (tsuid == null) tsuid = data.getString(Tag.TransferSyntaxUID);
         if (tsuid == null) throw new IOException("Missing TransferSyntaxUID from inbound or outbound properties");
         
-        MuleStoreSCU scu = new MuleStoreSCU(config, cuid, tsuid, aetName, hostname, port, cancelAfter);
+        MuleStoreSCU scu = new MuleStoreSCU(config, cuid, tsuid, aetName, hostname, port, cancelAfter, userName, userPassword, userResponseRequested);
     	try {
     		scu.open();
     		handler = scu.cstore(iuid, data);

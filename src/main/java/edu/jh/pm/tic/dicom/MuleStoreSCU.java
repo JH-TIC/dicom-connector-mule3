@@ -6,13 +6,12 @@ import org.dcm4che3.data.UID;
 import org.dcm4che3.net.*;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
+import org.dcm4che3.net.pdu.UserIdentityRQ;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.*;
 
 class MuleStoreSCU {
@@ -30,7 +29,7 @@ class MuleStoreSCU {
     private Association as;
     private ScheduledFuture<?> scheduledCancel;
 
-    public MuleStoreSCU(ConnectorConfig connector, String cuid, String tsuid, String remoteAetName, String remoteHostname, int remotePort, int cancelAfter) {
+    public MuleStoreSCU(ConnectorConfig connector, String cuid, String tsuid, String remoteAetName, String remoteHostname, int remotePort, int cancelAfter, String userName, String userPassword, boolean userResponseRequested) {
         this.cancelAfter = cancelAfter;
         this.cuid = cuid;
         this.tsuid = tsuid;
@@ -41,6 +40,10 @@ class MuleStoreSCU {
         device.addApplicationEntity(this.ae);
         this.ae.addConnection(this.conn);
         rq.setCalledAET(remoteAetName);
+        if (userName != null && !userName.isEmpty()) {
+            UserIdentityRQ identity = UserIdentityRQ.usernamePasscode(userName, userPassword.toCharArray(), userResponseRequested);
+            rq.setUserIdentityRQ(identity);
+        }
         remote.setHostname(remoteHostname);
         remote.setPort(remotePort);
         remote.setHttpProxy(null);
